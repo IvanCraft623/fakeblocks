@@ -79,14 +79,13 @@ final class FakeBlockManager implements Listener {
 		return $fakeblock;
 	}
 
-	public function destroy(FakeBlock $block) : void {
- 		foreach ($block->getViewers() as $viewer) {
- 			$block->removeViewer($player);
+	public function destroy(FakeBlock $fakeblock) : void {
+ 		foreach ($fakeblock->getViewers() as $viewer) {
+ 			$fakeblock->removeViewer($viewer);
  		}
- 		$pos = $block->getPosition();
- 		$worldId = spl_object_id($world);
-		$chunkHash = World::chunkHash($chunkX, $chunkZ);
- 		unset($this->fakeblocks[$worldId][$chunkHash][spl_object_id($fakeblock)]);
+ 		$pos = $fakeblock->getPosition();
+		$chunkHash = World::chunkHash($pos->getFloorX() >> Chunk::COORD_BIT_SIZE, $pos->getFloorZ() >> Chunk::COORD_BIT_SIZE);
+ 		unset($this->fakeblocks[spl_object_id($pos->getWorld())][$chunkHash][spl_object_id($fakeblock)]);
 	}
 
 	/**
@@ -94,12 +93,7 @@ final class FakeBlockManager implements Listener {
 	 * @return FakeBlock[]
 	 */
 	public function getFakeBlocksAt(World $world, int $chunkX, int $chunkZ) : array {
-		$worldId = spl_object_id($world);
-		$chunkHash = World::chunkHash($chunkX, $chunkZ);
-		if (isset($this->fakeblocks[$worldId]) && isset($this->fakeblocks[$worldId][$chunkHash])) {
-			return $this->fakeblocks[$worldId][$chunkHash];
-		}
-		return [];
+		return $this->fakeblocks[spl_object_id($world)][World::chunkHash($chunkX, $chunkZ)] ?? [];
 	}
 
 	/**

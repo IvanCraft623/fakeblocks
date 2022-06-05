@@ -28,6 +28,7 @@ Once registered you can do `FakeBlockManager::getInstance()` to get an instance
 $fakeblock = FakeBlockManager::getInstance()->create(VanillaBlocks::DIAMOND(), $position);
 ```
 `$position` is a `Position` object
+
 `$fakeblock` will contain a `FakeBlock` object
 
 ### Add a viewer for a fake block
@@ -42,7 +43,7 @@ This function removes a viewer from the fake block
 $fakeblock->removeViewer($player);
 ```
 
-### Get all observers of a fake block
+### Get all viewers of a fake block
 ```php
 $fakeblock->getViewers();
 ```

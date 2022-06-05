@@ -1,5 +1,5 @@
 name: fakeblocks
-version: 0.0.1
+version: 0.0.2
 antigen: IvanCraft623\fakeblocks
 api: [4.4.0]
 php: [8.0]
