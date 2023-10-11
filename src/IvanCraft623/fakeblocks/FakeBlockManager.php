@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace IvanCraft623\fakeblocks;
 
+use pocketmine\network\mcpe\convert\TypeConverter;
 use muqsit\simplepackethandler\SimplePacketHandler;
 use pocketmine\block\Block;
 use pocketmine\event\EventPriority;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerPostChunkSendEvent;
-use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
@@ -119,18 +119,14 @@ final class FakeBlockManager implements Listener {
 	public function createBlockUpdatePackets(Player $player, array $blocks) : array {
 		$packets = [];
 
-		$blockMapping = RuntimeBlockMapping::getInstance();
-		$methodExists = method_exists($blockMapping, "getMappingProtocol");
-		if ($methodExists) {
-			$mappingProtocol = $blockMapping->getMappingProtocol($player->getNetworkSession()->getProtocolId());
-		}
+        $blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
 
 		foreach ($blocks as $b) {
 			if ($b instanceof FakeBlock) {
 				$b->blockUpdatePacketQueue($player, true);
-				$fullId = $b->getBlock()->getFullId();
+				$fullId = $b->getBlock()->getStateId();
 			} elseif ($b instanceof Block) {
-				$fullId = $b->getFullId();
+				$fullId = $b->getStateId();
 			} else {
 				throw new \TypeError("Expected Block or FakeBlock in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
 			}
@@ -138,7 +134,7 @@ final class FakeBlockManager implements Listener {
 			$blockPosition = BlockPosition::fromVector3($b->getPosition());
 			$packets[] = UpdateBlockPacket::create(
 				$blockPosition,
-				($methodExists ? $blockMapping->toRuntimeId($fullId, $mappingProtocol) : $blockMapping->toRuntimeId($fullId)),
+				$blockTranslator->internalIdToNetworkId($fullId),
 				UpdateBlockPacket::FLAG_NETWORK,
 				UpdateBlockPacket::DATA_LAYER_NORMAL
 			);
