@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace IvanCraft623\fakeblocks;
 
+use Exception;
 use muqsit\simplepackethandler\SimplePacketHandler;
 use pocketmine\block\Block;
 use pocketmine\event\EventPriority;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerPostChunkSendEvent;
-use pocketmine\network\mcpe\convert\RuntimeBlockMapping;
+use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
@@ -19,10 +20,13 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\Position;
 use pocketmine\world\World;
-use Exception;
-use function is_object;
+use TypeError;
+use function count;
 use function get_class;
 use function gettype;
+use function is_object;
+use function method_exists;
+use function spl_object_id;
 
 final class FakeBlockManager implements Listener {
 	use SingletonTrait {
@@ -53,7 +57,7 @@ final class FakeBlockManager implements Listener {
 		$registrant->getServer()->getPluginManager()->registerEvents($instance, $registrant);
 
 		$interceptor = SimplePacketHandler::createInterceptor($registrant, EventPriority::HIGHEST);
-		$interceptor->interceptOutgoing(function(UpdateBlockPacket $packet, NetworkSession $target) use ($instance) : bool {
+		$interceptor->interceptOutgoing(function (UpdateBlockPacket $packet, NetworkSession $target) use ($instance) : bool {
 			$player = $target->getPlayer();
 			if ($player !== null) {
 				$bpos = $packet->blockPosition;
@@ -80,12 +84,12 @@ final class FakeBlockManager implements Listener {
 	}
 
 	public function destroy(FakeBlock $fakeblock) : void {
- 		foreach ($fakeblock->getViewers() as $viewer) {
- 			$fakeblock->removeViewer($viewer);
- 		}
- 		$pos = $fakeblock->getPosition();
+		foreach ($fakeblock->getViewers() as $viewer) {
+			$fakeblock->removeViewer($viewer);
+		}
+		$pos = $fakeblock->getPosition();
 		$chunkHash = World::chunkHash($pos->getFloorX() >> Chunk::COORD_BIT_SIZE, $pos->getFloorZ() >> Chunk::COORD_BIT_SIZE);
- 		unset($this->fakeblocks[spl_object_id($pos->getWorld())][$chunkHash][spl_object_id($fakeblock)]);
+		unset($this->fakeblocks[spl_object_id($pos->getWorld())][$chunkHash][spl_object_id($fakeblock)]);
 	}
 
 	/**
@@ -119,26 +123,27 @@ final class FakeBlockManager implements Listener {
 	public function createBlockUpdatePackets(Player $player, array $blocks) : array {
 		$packets = [];
 
-		$blockMapping = RuntimeBlockMapping::getInstance();
-		$methodExists = method_exists($blockMapping, "getMappingProtocol");
-		if ($methodExists) {
-			$mappingProtocol = $blockMapping->getMappingProtocol($player->getNetworkSession()->getProtocolId());
+		$networkSession = $player->getNetworkSession();
+		if (method_exists($networkSession, "getTypeConverter")) { //NG Fork support :D
+			$blockTranslator = $networkSession->getTypeConverter()->getBlockTranslator();
+		} else {
+			$blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
 		}
 
 		foreach ($blocks as $b) {
 			if ($b instanceof FakeBlock) {
 				$b->blockUpdatePacketQueue($player, true);
-				$fullId = $b->getBlock()->getFullId();
+				$stateId = $b->getBlock()->getStateId();
 			} elseif ($b instanceof Block) {
-				$fullId = $b->getFullId();
+				$stateId = $b->getStateId();
 			} else {
-				throw new \TypeError("Expected Block or FakeBlock in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
+				throw new TypeError("Expected Block or FakeBlock in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
 			}
 
 			$blockPosition = BlockPosition::fromVector3($b->getPosition());
 			$packets[] = UpdateBlockPacket::create(
 				$blockPosition,
-				($methodExists ? $blockMapping->toRuntimeId($fullId, $mappingProtocol) : $blockMapping->toRuntimeId($fullId)),
+				$blockTranslator->internalIdToNetworkId($stateId),
 				UpdateBlockPacket::FLAG_NETWORK,
 				UpdateBlockPacket::DATA_LAYER_NORMAL
 			);
@@ -156,8 +161,11 @@ final class FakeBlockManager implements Listener {
 				$fakeblocks[] = $fakeblock;
 			}
 		}
-		foreach ($this->createBlockUpdatePackets($player, $fakeblocks) as $packet) {
-			$player->getNetworkSession()->sendDataPacket($packet);
+
+		if (count($fakeblock > 0)) {
+			foreach ($this->createBlockUpdatePackets($player, $fakeblocks) as $packet) {
+				$player->getNetworkSession()->sendDataPacket($packet);
+			}
 		}
 	}
 }
