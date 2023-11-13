@@ -10,7 +10,6 @@ use pocketmine\block\Block;
 use pocketmine\event\EventPriority;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerPostChunkSendEvent;
-use pocketmine\network\mcpe\convert\TypeConverter;
 use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
@@ -20,12 +19,7 @@ use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\Position;
 use pocketmine\world\World;
-use TypeError;
 use function count;
-use function get_class;
-use function gettype;
-use function is_object;
-use function method_exists;
 use function spl_object_id;
 
 final class FakeBlockManager implements Listener {
@@ -123,13 +117,7 @@ final class FakeBlockManager implements Listener {
 	public function createBlockUpdatePackets(Player $player, array $blocks) : array {
 		$packets = [];
 
-		$networkSession = $player->getNetworkSession();
-		if (method_exists($networkSession, "getTypeConverter")) { //NG Fork support :D
-			$blockTranslator = $networkSession->getTypeConverter()->getBlockTranslator();
-		} else {
-			$blockTranslator = TypeConverter::getInstance()->getBlockTranslator();
-		}
-
+		$blockTranslator = $player->getNetworkSession()->getTypeConverter()->getBlockTranslator();
 		foreach ($blocks as $b) {
 			if ($b instanceof FakeBlock) {
 				$b->blockUpdatePacketQueue($player, true);
