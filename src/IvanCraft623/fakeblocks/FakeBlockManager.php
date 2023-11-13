@@ -15,7 +15,7 @@ use pocketmine\network\mcpe\NetworkSession;
 use pocketmine\network\mcpe\protocol\types\BlockPosition;
 use pocketmine\network\mcpe\protocol\UpdateBlockPacket;
 use pocketmine\player\Player;
-use pocketmine\plugin\Plugin;
+use pocketmine\plugin\PluginBase;
 use pocketmine\utils\SingletonTrait;
 use pocketmine\world\format\Chunk;
 use pocketmine\world\Position;
@@ -49,7 +49,7 @@ final class FakeBlockManager implements Listener {
 		return self::$isRegistered;
 	}
 
-	public static function register(Plugin $registrant) : void {
+	public static function register(PluginBase $registrant) : void {
 		if (self::$isRegistered) {
 			throw new Exception("FakeBlock listener is already registered by another plugin.");
 		}
@@ -136,8 +136,6 @@ final class FakeBlockManager implements Listener {
 				$stateId = $b->getBlock()->getStateId();
 			} elseif ($b instanceof Block) {
 				$stateId = $b->getStateId();
-			} else {
-				throw new TypeError("Expected Block or FakeBlock in blocks array, got " . (is_object($b) ? get_class($b) : gettype($b)));
 			}
 
 			$blockPosition = BlockPosition::fromVector3($b->getPosition());
@@ -162,7 +160,7 @@ final class FakeBlockManager implements Listener {
 			}
 		}
 
-		if (count($fakeblock > 0)) {
+		if (count($fakeblocks) > 0) {
 			foreach ($this->createBlockUpdatePackets($player, $fakeblocks) as $packet) {
 				$player->getNetworkSession()->sendDataPacket($packet);
 			}
