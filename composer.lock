@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ebb1a64f58e3040617103843c8754c86",
+    "content-hash": "340d946674bdfa85434954cc6762aad6",
     "packages": [
         {
             "name": "adhocore/json-comment",
@@ -122,22 +122,21 @@
         },
         {
             "name": "muqsit/simple-packet-handler",
-            "version": "dev-pm5",
+            "version": "0.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Muqsit/SimplePacketHandler.git",
-                "reference": "71af78006b2bbed324f48deebbdabfae222b432a"
+                "reference": "4e7b399c61f2def3c088ecde96e15d1f9858914f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Muqsit/SimplePacketHandler/zipball/71af78006b2bbed324f48deebbdabfae222b432a",
-                "reference": "71af78006b2bbed324f48deebbdabfae222b432a",
+                "url": "https://api.github.com/repos/Muqsit/SimplePacketHandler/zipball/4e7b399c61f2def3c088ecde96e15d1f9858914f",
+                "reference": "4e7b399c61f2def3c088ecde96e15d1f9858914f",
                 "shasum": ""
             },
             "require": {
                 "pocketmine/pocketmine-mp": "^5.0.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "virion": {
@@ -150,6 +149,7 @@
                     "src"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "GPL-3.0"
             ],
@@ -161,10 +161,10 @@
             ],
             "description": "Handle specific data packets (virion for PMMP API 4.0.0)",
             "support": {
-                "source": "https://github.com/Muqsit/SimplePacketHandler/tree/pm5",
-                "issues": "https://github.com/Muqsit/SimplePacketHandler/issues"
+                "issues": "https://github.com/Muqsit/SimplePacketHandler/issues",
+                "source": "https://github.com/Muqsit/SimplePacketHandler/tree/0.1.6"
             },
-            "time": "2023-06-01T23:54:58+00:00"
+            "time": "2026-02-17T11:40:38+00:00"
         },
         {
             "name": "pocketmine/bedrock-block-upgrade-schema",
@@ -1362,15 +1362,12 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {},
     "platform-dev": {
         "php": "^8.0"
     },
-    "platform-overrides": {
-        "php": "8.1"
-    },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.9.0"
 }

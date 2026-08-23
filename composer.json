@@ -9,14 +9,8 @@
         "phpstan/phpstan": "1.10.25"
     },
     "require": {
-        "muqsit/simple-packet-handler": "dev-pm5"
+        "muqsit/simple-packet-handler": "^0.1.6"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/Muqsit/SimplePacketHandler.git"
-        }
-    ],
     "minimum-stability": "dev",
     "autoload": {
         "classmap": ["src"]
